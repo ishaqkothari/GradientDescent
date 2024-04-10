@@ -1,12 +1,16 @@
 import numpy as np
 from autograd import grad
 from autograd import hessian
-from scipy.optimize import newton
 
 def func(x):
     return x[0]**2 + x[1] ** 2 + x[2] **2
 
 
+def Hessian(func):
+    return hessian(func)
+
+def distancefunc(x,manifold, x_manifold):
+    return np.linalg.norm(x- x_manifold)
 
 
 def gd(start, eta, tol, max_iter, func):
@@ -24,8 +28,6 @@ def gd(start, eta, tol, max_iter, func):
     return xarray
 
 
-    
-
 def main():
     start = [5, 4, 3,2]
     eta = 0.1
@@ -39,7 +41,13 @@ def main():
 if __name__ == "__main__":
     main()
 
+#Gradient Descent with Newton's Method
+#Same function, however need to check if point is on manifold
 
+#Steps: Define Manifold and its local cooridinate system
+#Implement some sort of distance (Euclidean) which meeasures distance of point from Manifold (np.linalg.norm)
+#Calculate Gradient and Hessian of f(x) - done
+# x_n+1 = x_n - (del^2 f(x_n))^-1 del f(x_n)
 
 
 
