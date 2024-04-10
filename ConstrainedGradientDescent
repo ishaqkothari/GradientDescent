@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.optimize import minimize
 from autograd import grad, hessian,jacobian
 
 # function to minimize
@@ -18,19 +17,17 @@ def newtonsMethod(x_k, a, b):
     point1 = np.array([x_k[0], x_k[2]])
     point2 = np.array([x_k[1], x_k[3]])
     
-    #Newton's Method for Both Constraints, for first constaint a=0
-        #computes gradient and Hessian at point, we then decrement by 
-    gradient = grad_distance(point1, 0, b)
-    hessian_matrix = Hess_distance(point1, 0, b)
-    point1 -= np.linalg.inv(hessian_matrix) @ gradient.T
+    # Newton's Method for Both Constraints, for first constraint a=0
+    gradient = grad_distance(point1, a, b)
+    hessian_matrix = Hess_distance(point1, a, b)
+    new_point1 = point1 - np.linalg.inv(hessian_matrix) @ gradient
 
     while not np.isclose(distance_circle_point(point2, a, b), 0):
-        gradient = grad_distance(np.array(point2), a, b)
+        gradient = grad_distance(point2, a, b)
         hessian_matrix = Hess_distance(point2, a, b)
-        point2 -= np.linalg.inv(hessian_matrix) @ gradient.T
+        new_point2 = point2 - np.linalg.inv(hessian_matrix) @ gradient
     
-    #concatenate both arrays to form x_k
-    return np.array(point1[0], point2[0], point1[1], point2[1])
+    return np.array([new_point1[0], new_point2[0], new_point1[1], new_point2[1]])
 
 
 
