@@ -1,16 +1,10 @@
 import numpy as np
 from autograd import grad
 from autograd import hessian
+from scipy.optimize import newton
 
 def func(x):
     return x[0]**2 + x[1] ** 2 + x[2] **2
-
-
-def Hessian(func):
-    return hessian(func)
-
-def distancefunc(x,manifold, x_manifold):
-    return np.linalg.norm(x- x_manifold)
 
 
 def gd(start, eta, tol, max_iter, func):
