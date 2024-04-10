@@ -1,0 +1,67 @@
+import numpy as np
+from scipy.optimize import minimize
+from autograd import grad, hessian,jacobian
+
+
+def func(x):
+    return np.abs(x[0] - x[1])**2 + np.abs(x[2] - x[3]) - 4
+
+
+def distance_circle_point(x, a, b):
+    return np.abs((x[0] - a)**2 + x[1]**2 - b**2)
+
+
+
+def newtonsMethod(x_k, a, b):
+    grad_distance = grad(distance_circle_point)
+    Hess_distance = hessian(distance_circle_point)
+    point1 = np.array([x_k[0], x_k[2]])
+    point2 = np.array([x_k[1], x_k[3]])
+    
+    #Newton's Method for Both Constraints
+    while not np.isclose(distance_circle_point(point1, a, b), 0):
+        gradient = grad_distance(point1, a, b)
+        hessian_matrix = Hess_distance(point1, a, b)
+        point1 -= np.linalg.inv(hessian_matrix) @ gradient.T
+
+    while not np.isclose(distance_circle_point(point2, a, b), 0):
+        gradient = grad_distance(np.array(point2), a, b)
+        hessian_matrix = Hess_distance(point2, a, b)
+        point2 -= np.linalg.inv(hessian_matrix) @ gradient.T
+
+    return np.array([point1[0], point2[0], point1[1], point2[1]])
+
+
+
+
+def is_on_manifold(x, a, b):
+    f1 = x[0]**2 + x[2]**2 
+    f2 = (x[1]-a)**2 + x[3]**2
+    return np.isclose(f1, b**2) and np.isclose(f2, b**2)
+
+def gd_constrained(start, eta, tol, max_iter, func, a, b):
+    grad_func = grad(func)
+    x_k = np.array(start, dtype=float)
+    for i in range(max_iter):
+        grad_x_k = grad_func(x_k)
+        x_k1 = x_k - eta * grad_x_k
+        if not is_on_manifold(x_k1, a, b).all():  
+            x_k1 =  newtonsMethod(x_k1, a, b)  
+        if np.linalg.norm(x_k1 - x_k) < tol:
+            break
+        x_k = x_k1
+    return x_k
+
+def main():
+    start = [0, 1, 1, 0]
+    eta = 0.1
+    tol = 1e-5
+    max_iter = 10000
+    a = 4
+    b = 1
+    x_optimal = gd_constrained(start, eta, tol, max_iter, func, a, b)
+    print("Optimal value:", x_optimal)
+    print("Is on manifold:", is_on_manifold(x_optimal, a, b))
+   
+if __name__ == "__main__":
+    main()
