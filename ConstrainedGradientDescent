@@ -2,11 +2,11 @@ import numpy as np
 from scipy.optimize import minimize
 from autograd import grad, hessian,jacobian
 
-
+# function to minimize
 def func(x):
     return np.abs(x[0] - x[1])**2 + np.abs(x[2] - x[3]) - 4
 
-
+# distance from point to manifold, a can 
 def distance_circle_point(x, a, b):
     return np.abs((x[0] - a)**2 + x[1]**2 - b**2)
 
@@ -18,27 +18,29 @@ def newtonsMethod(x_k, a, b):
     point1 = np.array([x_k[0], x_k[2]])
     point2 = np.array([x_k[1], x_k[3]])
     
-    #Newton's Method for Both Constraints
-    while not np.isclose(distance_circle_point(point1, a, b), 0):
-        gradient = grad_distance(point1, a, b)
-        hessian_matrix = Hess_distance(point1, a, b)
-        point1 -= np.linalg.inv(hessian_matrix) @ gradient.T
+    #Newton's Method for Both Constraints, for first constaint a=0
+        #computes gradient and Hessian at point, we then decrement by 
+    gradient = grad_distance(point1, 0, b)
+    hessian_matrix = Hess_distance(point1, 0, b)
+    point1 -= np.linalg.inv(hessian_matrix) @ gradient.T
 
     while not np.isclose(distance_circle_point(point2, a, b), 0):
         gradient = grad_distance(np.array(point2), a, b)
         hessian_matrix = Hess_distance(point2, a, b)
         point2 -= np.linalg.inv(hessian_matrix) @ gradient.T
+    
+    #concatenate both arrays to form x_k
+    return np.array(point1[0], point2[0], point1[1], point2[1])
 
-    return np.array([point1[0], point2[0], point1[1], point2[1]])
 
 
-
-
+#Checks if point is on manifold
 def is_on_manifold(x, a, b):
     f1 = x[0]**2 + x[2]**2 
     f2 = (x[1]-a)**2 + x[3]**2
     return np.isclose(f1, b**2) and np.isclose(f2, b**2)
 
+#Gradient descent function where 
 def gd_constrained(start, eta, tol, max_iter, func, a, b):
     grad_func = grad(func)
     x_k = np.array(start, dtype=float)
