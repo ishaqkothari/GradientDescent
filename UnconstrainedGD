@@ -1,0 +1,117 @@
+import numpy as np
+from autograd import grad
+from autograd import hessian
+from scipy.optimize import newton
+
+def func(x):
+    return x[0]**2 + x[1] ** 2 + x[2] **2
+
+#def constraint(x):
+
+def Hessian(func):
+    return hessian(func)
+
+def distancefunc(x,manifold, x_manifold):
+    return np.linalg.norm(x- x_manifold)
+
+
+def gd(start, eta, tol, max_iter, func):
+    xarray = []
+    grad_func = grad(func)
+    print(grad_func(np.array([0,1,2],dtype=float)))
+    x_k = np.array(start, dtype=float)  # Convert start to float
+    for i in range(max_iter):
+        grad_x_k = grad_func(x_k)
+        x_k1 = x_k - eta * grad_x_k
+        xarray.append(x_k1)
+        if np.linalg.norm(x_k1 - x_k) < tol:
+            break
+        x_k = x_k1
+    return xarray
+
+def isonManifold(x,a,b):
+    if((x[0]**2 + x[2]**2 != b**2) and (((x[1] -a )**2 + x[3]**2) != b**2)):
+       return False
+    else:
+        return True
+    
+
+def project_to_manifold(initial_guess, a, b):
+    def f(x):
+        return isonManifold(x, a, b)
+    
+    # Use Newton's method to find the root
+    projected_point = newton(f, initial_guess)
+    return projected_point
+
+# Example usage:
+initial_guess = np.array([1.0, 2.0, 3.0, 4.0])  # Initial guess for the point on the manifold
+a = 0  # Example value for a
+b = 1  # Example value for b
+
+projected_point = project_to_manifold(initial_guess, a, b)
+print("Projected Point on the Manifold:", projected_point)
+
+def newfunc(x):
+    return np.abs(x[0]- x[1])**2 + np.abs(x[2]- x[3]) - 4
+
+def isonManifold(x,a,b):
+    if((x[0]**2 + x[2]**2 != b**2) and (((x[1] -a )**2 + x[3]**2) != b**2)):
+       return False
+    else:
+        return True
+    
+
+def project_to_manifold(initial_guess, a, b):
+    def f(x):
+        return isonManifold(x, a, b)
+    
+    # Use Newton's method to find the root
+    projected_point = newton(f, initial_guess)
+    return projected_point
+
+# Example usage:
+initial_guess = np.array([1.0, 2.0, 3.0, 4.0])  # Initial guess for the point on the manifold
+a = 0  # Example value for a
+b = 1  # Example value for b
+
+projected_point = project_to_manifold(initial_guess, a, b)
+print("Projected Point on the Manifold:", projected_point)
+
+
+
+
+
+
+def main():
+    start = [5, 4, 3,2]
+    eta = 0.1
+    tol = 1e-5
+    max_iter = 100
+    AB=4
+    xarray = gd(start, eta, tol, max_iter, newfunc)
+    print("Optimal value:", xarray[-1])
+
+
+if __name__ == "__main__":
+    main()
+
+#Gradient Descent with Newton's Method
+#Same function, however need to check if point is on manifold
+
+#Steps: Define Manifold and its local cooridinate system
+#Implement some sort of distance (Euclidean) which meeasures distance of point from Manifold (np.linalg.norm)
+#Calculate Gradient and Hessian of f(x) - done
+# x_n+1 = x_n - (del^2 f(x_n))^-1 del f(x_n)
+
+
+
+
+
+#What to do next define manifold, (see problem if point is not on constrained manifold we then use newtons method, otherwise we use gradient descent)
+#func =     abs(x[0]- x[1])**2 +  abs(x[2]- x[3])**2 = AB ** We can run unconstrained gradient descent on this function using our above algorithm
+#manifold x1^2 + y1^2 = b^2 and (x1-a)^2 + (y_2)^2 = b^2
+# Project onto manifold- find closest point which is on the manifold (use dot project to project, then iterate untill distance is zero)
+#then continue gradient descent
+# The simplest method is to calculate the Euclidean distance between the point and every point on the manifold and then take the minimum distance. This is straightforward but computationally expensive, especially for high-dimensional manifolds.
+
